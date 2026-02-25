@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import functools
 import logging
 import time
 from datetime import timedelta
+from typing import Any
 
 import teslapy
 from homeassistant.core import HomeAssistant
@@ -72,3 +74,30 @@ class TeslaDataCoordinator(DataUpdateCoordinator):
             raise
         except Exception as e:
             raise UpdateFailed(f"Fehler beim Datenabruf: {e}") from e
+
+    def _execute_command(self, command: str, **kwargs: Any) -> dict:
+        with teslapy.Tesla(self.email, cache_file=self.cache_file) as tesla:
+            if not tesla.authorized:
+                raise Exception("Tesla nicht authentifiziert")
+            vehicles = tesla.vehicle_list()
+            if not vehicles:
+                raise Exception("Kein Fahrzeug gefunden")
+            vehicle = vehicles[0]
+            if vehicle.get("state") != "online":
+                _LOGGER.debug("Wecke Fahrzeug für Befehl '%s'...", command)
+                for attempt in range(12):
+                    try:
+                        resp = vehicle.api("WAKE_UP")
+                        if resp["response"]["state"] == "online":
+                            break
+                    except Exception as e:
+                        _LOGGER.debug("Wake-up Versuch %d: %s", attempt + 1, e)
+                    time.sleep(10)
+            return vehicle.api(command, **kwargs)
+
+    async def async_command(self, command: str, **kwargs: Any) -> dict:
+        result = await self.hass.async_add_executor_job(
+            functools.partial(self._execute_command, command, **kwargs)
+        )
+        await self.async_request_refresh()
+        return result

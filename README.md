@@ -31,6 +31,23 @@ Kostenlose Tesla-Integration für Home Assistant via inoffizielle Owner API — 
 | Sentry Mode | Sentry Mode aktiv |
 | Kabel angesteckt | Ladekabel eingesteckt |
 
+## Steuerung
+
+| Entität | Typ | Beschreibung |
+|---|---|---|
+| Standheizung | Climate | Ein/Aus + Zieltemperatur (15–28 °C) |
+| Türschloss | Lock | Verriegeln / Entriegeln |
+| Sentry Mode | Switch | Sentry Mode ein-/ausschalten |
+| Laden | Switch | Laden starten / stoppen |
+| Ladelimit | Number | Ladelimit 50–100 % (Schieberegler) |
+| Lichter blinken | Button | Lichter kurz aufblinken lassen |
+| Hupe | Button | Hupe betätigen |
+| Frunk öffnen | Button | Vordere Haube öffnen |
+| Kofferraum öffnen | Button | Hintere Klappe öffnen |
+| Ladeanschluss öffnen | Button | Ladeklappe öffnen |
+
+> **Hinweis:** Bei neueren Fahrzeugen (Gigafactory Berlin, ab ~2022) kann Tesla für Steuerbefehle das neue Signierprotokoll erzwingen. Sollten Befehle nicht funktionieren, erscheint in den HA-Logs eine entsprechende Meldung.
+
 ## Installation via HACS
 
 1. HACS öffnen → **Integrationen** → Menü (⋮) → **Custom repositories**
