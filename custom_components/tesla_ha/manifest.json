@@ -1,0 +1,13 @@
+{
+  "domain": "tesla_ha",
+  "name": "Tesla",
+  "version": "1.0.0",
+  "documentation": "https://github.com/Feberdin/tesla-ha",
+  "issue_tracker": "https://github.com/Feberdin/tesla-ha/issues",
+  "requirements": ["teslapy==2.9.0"],
+  "dependencies": [],
+  "codeowners": ["@Feberdin"],
+  "iot_class": "cloud_polling",
+  "config_flow": true,
+  "homeassistant": "2023.1.0"
+}

@@ -1,0 +1,28 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Tesla Account",
+        "description": "Enter your Tesla account email address.",
+        "data": {
+          "email": "Email Address"
+        }
+      },
+      "auth": {
+        "title": "Tesla Authentication",
+        "description": "**Step 1:** Open the following link in your browser and sign in with your Tesla account:\n\n[Open Tesla Login]({auth_url})\n\n**Step 2:** After login you will be redirected to a blank page.\n\n**Step 3:** Copy the full URL from the address bar (starts with `https://auth.tesla.com/void/callback?code=...`) and paste it below.",
+        "data": {
+          "callback_url": "Callback URL"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Authentication failed. Please try again with a new URL.",
+      "no_vehicles": "No vehicles found in Tesla account.",
+      "unknown": "An unknown error occurred."
+    },
+    "abort": {
+      "already_configured": "Tesla is already configured."
+    }
+  }
+}
