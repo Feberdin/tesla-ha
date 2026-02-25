@@ -49,7 +49,7 @@ class TeslaLock(CoordinatorEntity[TeslaDataCoordinator], LockEntity):
         return self.coordinator.data.get("vehicle_state", {}).get("locked", True)
 
     async def async_lock(self, **kwargs: Any) -> None:
-        await self.coordinator.async_command("DOOR_LOCK")
+        await self.coordinator.async_command("LOCK")
 
     async def async_unlock(self, **kwargs: Any) -> None:
-        await self.coordinator.async_command("DOOR_UNLOCK")
+        await self.coordinator.async_command("UNLOCK")

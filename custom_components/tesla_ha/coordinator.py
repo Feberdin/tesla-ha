@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import functools
 import logging
 import time
@@ -99,5 +100,7 @@ class TeslaDataCoordinator(DataUpdateCoordinator):
         result = await self.hass.async_add_executor_job(
             functools.partial(self._execute_command, command, **kwargs)
         )
+        # Wait 3 seconds so the vehicle can process the command before we refresh
+        await asyncio.sleep(3)
         await self.async_request_refresh()
         return result
