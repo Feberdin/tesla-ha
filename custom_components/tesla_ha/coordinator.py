@@ -36,6 +36,7 @@ class TeslaDataCoordinator(DataUpdateCoordinator):
         self.cache_file = cache_file
         self.vin: str | None = None
         self.model: str = "Tesla"
+        self.has_seat_cooling: bool = False
 
     def _fetch_data(self) -> dict:
         with teslapy.Tesla(self.email, cache_file=self.cache_file) as tesla:
@@ -47,10 +48,6 @@ class TeslaDataCoordinator(DataUpdateCoordinator):
                 raise UpdateFailed("Keine Fahrzeuge gefunden")
 
             vehicle = vehicles[0]
-
-            if self.vin is None:
-                self.vin = vehicle.get("vin")
-                self.model = _model_from_vin(self.vin)
 
             if vehicle.get("state") != "online":
                 _LOGGER.debug("Fahrzeug schläft, wecke auf...")
@@ -66,7 +63,14 @@ class TeslaDataCoordinator(DataUpdateCoordinator):
                 else:
                     raise UpdateFailed("Fahrzeug konnte nicht aufgeweckt werden")
 
-            return vehicle.get_vehicle_data()
+            data = vehicle.get_vehicle_data()
+
+            if self.vin is None:
+                self.vin = vehicle.get("vin")
+                self.model = _model_from_vin(self.vin)
+                self.has_seat_cooling = data.get("vehicle_config", {}).get("has_seat_cooling", False)
+
+            return data
 
     async def _async_update_data(self) -> dict:
         try:

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from homeassistant.components.number import NumberEntity, NumberMode
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import PERCENTAGE
+from homeassistant.const import PERCENTAGE, UnitOfElectricCurrent
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -18,7 +18,10 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     coordinator: TeslaDataCoordinator = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities([TeslaChargeLimitNumber(coordinator, entry)])
+    async_add_entities([
+        TeslaChargeLimitNumber(coordinator, entry),
+        TeslaChargingAmpsNumber(coordinator, entry),
+    ])
 
 
 class TeslaChargeLimitNumber(CoordinatorEntity[TeslaDataCoordinator], NumberEntity):
@@ -33,7 +36,7 @@ class TeslaChargeLimitNumber(CoordinatorEntity[TeslaDataCoordinator], NumberEnti
 
     def __init__(self, coordinator: TeslaDataCoordinator, entry: ConfigEntry) -> None:
         super().__init__(coordinator)
-        self._attr_unique_id = f"{entry.entry_id}_charge_limit_number"
+        self._attr_unique_id = f"{entry.entry_id}_charge_limit"
         self._entry = entry
 
     @property
@@ -53,6 +56,49 @@ class TeslaChargeLimitNumber(CoordinatorEntity[TeslaDataCoordinator], NumberEnti
         return self.coordinator.data.get("charge_state", {}).get("charge_limit_soc")
 
     async def async_set_native_value(self, value: float) -> None:
-        await self.coordinator.async_command(
-            "SET_CHARGE_LIMIT", percent=int(value)
+        await self.coordinator.async_command("SET_CHARGE_LIMIT", percent=int(value))
+
+
+class TeslaChargingAmpsNumber(CoordinatorEntity[TeslaDataCoordinator], NumberEntity):
+    _attr_has_entity_name = True
+    _attr_name = "Ladestrom"
+    _attr_icon = "mdi:current-ac"
+    _attr_native_min_value = 1
+    _attr_native_max_value = 32
+    _attr_native_step = 1
+    _attr_native_unit_of_measurement = UnitOfElectricCurrent.AMPERE
+    _attr_mode = NumberMode.SLIDER
+
+    def __init__(self, coordinator: TeslaDataCoordinator, entry: ConfigEntry) -> None:
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_charging_amps"
+        self._entry = entry
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        return DeviceInfo(
+            identifiers={(DOMAIN, self._entry.entry_id)},
+            name=f"Tesla {self.coordinator.model}",
+            manufacturer="Tesla",
+            model=self.coordinator.model,
+            serial_number=self.coordinator.vin,
         )
+
+    @property
+    def native_max_value(self) -> float:
+        if self.coordinator.data:
+            return float(
+                self.coordinator.data.get("charge_state", {}).get(
+                    "charge_current_request_max", 32
+                )
+            )
+        return 32.0
+
+    @property
+    def native_value(self) -> float | None:
+        if self.coordinator.data is None:
+            return None
+        return self.coordinator.data.get("charge_state", {}).get("charge_current_request")
+
+    async def async_set_native_value(self, value: float) -> None:
+        await self.coordinator.async_command("CHARGING_AMPS", charging_amps=int(value))

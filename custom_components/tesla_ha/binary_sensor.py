@@ -24,6 +24,7 @@ class TeslaBinarySensorDescription(BinarySensorEntityDescription):
 
 
 BINARY_SENSOR_TYPES: tuple[TeslaBinarySensorDescription, ...] = (
+    # ── Laden ────────────────────────────────────────────────────────────────
     TeslaBinarySensorDescription(
         key="charging",
         name="Lädt",
@@ -31,12 +32,101 @@ BINARY_SENSOR_TYPES: tuple[TeslaBinarySensorDescription, ...] = (
         value_fn=lambda d: d.get("charge_state", {}).get("charging_state") == "Charging",
     ),
     TeslaBinarySensorDescription(
+        key="cable_connected",
+        name="Kabel angesteckt",
+        device_class=BinarySensorDeviceClass.PLUG,
+        value_fn=lambda d: d.get("charge_state", {}).get("conn_charge_cable")
+        not in ("<invalid>", None, ""),
+    ),
+    TeslaBinarySensorDescription(
+        key="charge_port_open",
+        name="Ladeanschluss offen",
+        device_class=BinarySensorDeviceClass.OPENING,
+        value_fn=lambda d: d.get("charge_state", {}).get("charge_port_door_open"),
+    ),
+    TeslaBinarySensorDescription(
+        key="battery_heater",
+        name="Batterieheizung",
+        device_class=BinarySensorDeviceClass.HEAT,
+        value_fn=lambda d: d.get("charge_state", {}).get("battery_heater_on"),
+    ),
+    # ── Fahrzeug ─────────────────────────────────────────────────────────────
+    TeslaBinarySensorDescription(
         key="locked",
         name="Verriegelt",
         device_class=BinarySensorDeviceClass.LOCK,
-        # BinarySensorDeviceClass.LOCK: on = unlocked, off = locked
+        # LOCK: on = unlocked, off = locked
         value_fn=lambda d: not d.get("vehicle_state", {}).get("locked", True),
     ),
+    TeslaBinarySensorDescription(
+        key="user_present",
+        name="Nutzer anwesend",
+        device_class=BinarySensorDeviceClass.PRESENCE,
+        value_fn=lambda d: d.get("vehicle_state", {}).get("is_user_present"),
+    ),
+    # ── Türen ────────────────────────────────────────────────────────────────
+    TeslaBinarySensorDescription(
+        key="door_driver_front",
+        name="Fahrertür",
+        device_class=BinarySensorDeviceClass.DOOR,
+        value_fn=lambda d: bool(d.get("vehicle_state", {}).get("df", 0)),
+    ),
+    TeslaBinarySensorDescription(
+        key="door_passenger_front",
+        name="Beifahrertür",
+        device_class=BinarySensorDeviceClass.DOOR,
+        value_fn=lambda d: bool(d.get("vehicle_state", {}).get("pf", 0)),
+    ),
+    TeslaBinarySensorDescription(
+        key="door_driver_rear",
+        name="Fondtür Links",
+        device_class=BinarySensorDeviceClass.DOOR,
+        value_fn=lambda d: bool(d.get("vehicle_state", {}).get("dr", 0)),
+    ),
+    TeslaBinarySensorDescription(
+        key="door_passenger_rear",
+        name="Fondtür Rechts",
+        device_class=BinarySensorDeviceClass.DOOR,
+        value_fn=lambda d: bool(d.get("vehicle_state", {}).get("pr", 0)),
+    ),
+    TeslaBinarySensorDescription(
+        key="frunk_open",
+        name="Frunk offen",
+        device_class=BinarySensorDeviceClass.OPENING,
+        value_fn=lambda d: bool(d.get("vehicle_state", {}).get("ft", 0)),
+    ),
+    TeslaBinarySensorDescription(
+        key="trunk_open",
+        name="Kofferraum offen",
+        device_class=BinarySensorDeviceClass.OPENING,
+        value_fn=lambda d: bool(d.get("vehicle_state", {}).get("rt", 0)),
+    ),
+    # ── Fenster ──────────────────────────────────────────────────────────────
+    TeslaBinarySensorDescription(
+        key="window_driver_front",
+        name="Fenster Fahrer",
+        device_class=BinarySensorDeviceClass.WINDOW,
+        value_fn=lambda d: bool(d.get("vehicle_state", {}).get("fd_window", 0)),
+    ),
+    TeslaBinarySensorDescription(
+        key="window_passenger_front",
+        name="Fenster Beifahrer",
+        device_class=BinarySensorDeviceClass.WINDOW,
+        value_fn=lambda d: bool(d.get("vehicle_state", {}).get("fp_window", 0)),
+    ),
+    TeslaBinarySensorDescription(
+        key="window_driver_rear",
+        name="Fenster Fond Links",
+        device_class=BinarySensorDeviceClass.WINDOW,
+        value_fn=lambda d: bool(d.get("vehicle_state", {}).get("rd_window", 0)),
+    ),
+    TeslaBinarySensorDescription(
+        key="window_passenger_rear",
+        name="Fenster Fond Rechts",
+        device_class=BinarySensorDeviceClass.WINDOW,
+        value_fn=lambda d: bool(d.get("vehicle_state", {}).get("rp_window", 0)),
+    ),
+    # ── Klima ────────────────────────────────────────────────────────────────
     TeslaBinarySensorDescription(
         key="climate_on",
         name="Klimaanlage",
@@ -49,12 +139,38 @@ BINARY_SENSOR_TYPES: tuple[TeslaBinarySensorDescription, ...] = (
         icon="mdi:shield-car",
         value_fn=lambda d: d.get("vehicle_state", {}).get("sentry_mode"),
     ),
+    # ── Reifendruck Warnungen ─────────────────────────────────────────────
     TeslaBinarySensorDescription(
-        key="cable_connected",
-        name="Kabel angesteckt",
-        device_class=BinarySensorDeviceClass.PLUG,
-        value_fn=lambda d: d.get("charge_state", {}).get("conn_charge_cable")
-        not in ("<invalid>", None, ""),
+        key="tpms_warn_fl",
+        name="Reifendruckwarnung VL",
+        device_class=BinarySensorDeviceClass.PROBLEM,
+        icon="mdi:tire-alert",
+        value_fn=lambda d: d.get("vehicle_state", {}).get("tpms_soft_warning_fl", False)
+        or d.get("vehicle_state", {}).get("tpms_hard_warning_fl", False),
+    ),
+    TeslaBinarySensorDescription(
+        key="tpms_warn_fr",
+        name="Reifendruckwarnung VR",
+        device_class=BinarySensorDeviceClass.PROBLEM,
+        icon="mdi:tire-alert",
+        value_fn=lambda d: d.get("vehicle_state", {}).get("tpms_soft_warning_fr", False)
+        or d.get("vehicle_state", {}).get("tpms_hard_warning_fr", False),
+    ),
+    TeslaBinarySensorDescription(
+        key="tpms_warn_rl",
+        name="Reifendruckwarnung HL",
+        device_class=BinarySensorDeviceClass.PROBLEM,
+        icon="mdi:tire-alert",
+        value_fn=lambda d: d.get("vehicle_state", {}).get("tpms_soft_warning_rl", False)
+        or d.get("vehicle_state", {}).get("tpms_hard_warning_rl", False),
+    ),
+    TeslaBinarySensorDescription(
+        key="tpms_warn_rr",
+        name="Reifendruckwarnung HR",
+        device_class=BinarySensorDeviceClass.PROBLEM,
+        icon="mdi:tire-alert",
+        value_fn=lambda d: d.get("vehicle_state", {}).get("tpms_soft_warning_rr", False)
+        or d.get("vehicle_state", {}).get("tpms_hard_warning_rr", False),
     ),
 )
 
@@ -98,8 +214,6 @@ class TeslaBinarySensor(CoordinatorEntity[TeslaDataCoordinator], BinarySensorEnt
 
     @property
     def is_on(self) -> bool | None:
-        if self.coordinator.data is None:
-            return None
-        if self.entity_description.value_fn is None:
+        if self.coordinator.data is None or self.entity_description.value_fn is None:
             return None
         return self.entity_description.value_fn(self.coordinator.data)

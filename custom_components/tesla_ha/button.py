@@ -24,6 +24,7 @@ class TeslaButtonDescription(ButtonEntityDescription):
 
 
 BUTTON_TYPES: tuple[TeslaButtonDescription, ...] = (
+    # ── Fahrzeug ─────────────────────────────────────────────────────────────
     TeslaButtonDescription(
         key="flash_lights",
         name="Lichter blinken",
@@ -55,6 +56,43 @@ BUTTON_TYPES: tuple[TeslaButtonDescription, ...] = (
         name="Ladeanschluss öffnen",
         icon="mdi:ev-plug-type2",
         command="CHARGE_PORT_DOOR_OPEN",
+    ),
+    TeslaButtonDescription(
+        key="close_charge_port",
+        name="Ladeanschluss schließen",
+        icon="mdi:ev-plug-type2",
+        command="CHARGE_PORT_DOOR_CLOSE",
+    ),
+    # ── Medien ───────────────────────────────────────────────────────────────
+    TeslaButtonDescription(
+        key="media_play_pause",
+        name="Wiedergabe Pause/Play",
+        icon="mdi:play-pause",
+        command="MEDIA_TOGGLE_PLAYBACK",
+    ),
+    TeslaButtonDescription(
+        key="media_next",
+        name="Nächster Titel",
+        icon="mdi:skip-next",
+        command="MEDIA_NEXT_TRACK",
+    ),
+    TeslaButtonDescription(
+        key="media_prev",
+        name="Vorheriger Titel",
+        icon="mdi:skip-previous",
+        command="MEDIA_PREVIOUS_TRACK",
+    ),
+    TeslaButtonDescription(
+        key="media_volume_up",
+        name="Lautstärke lauter",
+        icon="mdi:volume-plus",
+        command="MEDIA_VOLUME_UP",
+    ),
+    TeslaButtonDescription(
+        key="media_volume_down",
+        name="Lautstärke leiser",
+        icon="mdi:volume-minus",
+        command="MEDIA_VOLUME_DOWN",
     ),
 )
 

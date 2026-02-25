@@ -46,6 +46,26 @@ SWITCH_TYPES: tuple[TeslaSwitchDescription, ...] = (
         turn_on_command="START_CHARGE",
         turn_off_command="STOP_CHARGE",
     ),
+    TeslaSwitchDescription(
+        key="steering_wheel_heater",
+        name="Lenkradheizung",
+        icon="mdi:steering",
+        is_on_fn=lambda d: d.get("climate_state", {}).get("steering_wheel_heater"),
+        turn_on_command="REMOTE_STEERING_WHEEL_HEATER_REQUEST",
+        turn_on_kwargs={"on": True},
+        turn_off_command="REMOTE_STEERING_WHEEL_HEATER_REQUEST",
+        turn_off_kwargs={"on": False},
+    ),
+    TeslaSwitchDescription(
+        key="max_defrost",
+        name="Maximal-Heizung",
+        icon="mdi:car-defrost-front",
+        is_on_fn=lambda d: d.get("climate_state", {}).get("defrost_mode", 0) != 0,
+        turn_on_command="MAX_DEFROST",
+        turn_on_kwargs={"on": True},
+        turn_off_command="MAX_DEFROST",
+        turn_off_kwargs={"on": False},
+    ),
 )
 
 

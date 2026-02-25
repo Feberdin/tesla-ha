@@ -1,5 +1,5 @@
 DOMAIN = "tesla_ha"
-PLATFORMS = ["sensor", "binary_sensor", "climate", "lock", "switch", "button", "number"]
+PLATFORMS = ["sensor", "binary_sensor", "climate", "lock", "switch", "button", "number", "select"]
 UPDATE_INTERVAL = 5  # minutes
 
 TESLA_MODELS = {
