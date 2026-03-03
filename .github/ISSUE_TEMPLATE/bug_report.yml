@@ -1,0 +1,50 @@
+name: Bug report
+description: Melde einen reproduzierbaren Fehler
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Danke fürs Melden. Bitte keine Secrets oder Tokens posten.
+  - type: input
+    id: summary
+    attributes:
+      label: Kurzbeschreibung
+      description: Was ist kaputt?
+      placeholder: Beim Auth-Flow bleibt die Integration im Ladezustand hängen
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduktionsschritte
+      description: Bitte Schritt für Schritt
+      placeholder: |
+        1. Integration hinzufügen
+        2. E-Mail eingeben
+        3. Callback URL einfügen
+        4. Fehler erscheint
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Erwartetes Verhalten
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevante Logs
+      description: Bitte sensible Daten maskieren
+      render: shell
+    validations:
+      required: false
+  - type: input
+    id: versions
+    attributes:
+      label: Versionen
+      description: Home Assistant / Integration / Python
+      placeholder: HA 2026.2.x, tesla-ha 1.2.0, Python 3.12
+    validations:
+      required: true

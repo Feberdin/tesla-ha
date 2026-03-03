@@ -97,6 +97,35 @@ Vollständige Tesla-Integration für Home Assistant — **kostenlos**, kein Flee
 
 > ¹ Nur bei Fahrzeugen mit Sitzkühlung (wird automatisch erkannt)
 
+### Welche Funktionen kann die Integration steuern?
+
+Die Integration kann folgende Funktionen aktiv steuern:
+
+- Klima: Standheizung/Klimaanlage ein- und ausschalten, Zieltemperatur setzen (15–28 °C)
+- Fahrzeugzugriff: Verriegeln und Entriegeln
+- Laden: Laden starten/stoppen, Ladelimit setzen, Ladestrom einstellen
+- Sicherheit/Komfort: Sentry Mode, Lenkradheizung, Maximal-Heizung (Defrost)
+- Sitze: Sitzheizungen (vorn + hinten) und je nach Fahrzeug Sitzkühlung (vorn)
+- Fahrzeugaktionen: Lichter blinken, Hupe, Frunk öffnen, Kofferraum öffnen
+- Ladeport: Ladeanschluss öffnen und schließen
+- Medien: Wiedergabe/Pause, nächster/vorheriger Titel, Lautstärke lauter/leiser
+
+### Screenshots
+
+**Home Assistant Karten mit Entitäten dieser Integration**
+
+![Steuerelemente Übersicht](assets/screenshots/ha-controls-overview-1.png)
+![Steuerelemente und Sensoren](assets/screenshots/ha-controls-and-sensors-overview-2.png)
+![Sensoren Übersicht Teil 1](assets/screenshots/ha-sensors-overview-1.png)
+![Sensoren Übersicht Teil 2](assets/screenshots/ha-sensors-overview-2.png)
+
+**Vehicle Status-Karte (externe Integration)**
+
+![Externe Vehicle Status-Karte](assets/screenshots/external-vehicle-status-card.png)
+
+> Hinweis: Die Vehicle Status-Karte im Screenshot stammt aus einer externen Integration und dient hier nur der Darstellung.
+> Vielen Dank an die Entwickler:innen dieser Karte.
+
 ---
 
 ## Installation

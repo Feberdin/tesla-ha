@@ -1,0 +1,32 @@
+name: Feature request
+description: Schlage eine Verbesserung vor
+labels: [enhancement]
+body:
+  - type: input
+    id: problem
+    attributes:
+      label: Welches Problem soll gelöst werden?
+      placeholder: Ich kann nur das erste Fahrzeug verwenden
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Lösungsvorschlag
+      placeholder: Multi-Vehicle-Auswahl im Config Flow
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativen
+      placeholder: Aktuell nutze ich Workarounds mit separaten Instanzen
+    validations:
+      required: false
+  - type: textarea
+    id: impact
+    attributes:
+      label: Nutzerwirkung
+      description: Wer profitiert und wie stark?
+    validations:
+      required: false

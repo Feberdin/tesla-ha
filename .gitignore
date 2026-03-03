@@ -1,0 +1,20 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+venv/
+
+# Test / tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local IDE/system files
+.DS_Store
+.vscode/
+.idea/
+
+# Local secrets/cache used during development
+cache.json
