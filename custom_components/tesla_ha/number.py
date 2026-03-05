@@ -11,6 +11,9 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from .const import DOMAIN
 from .coordinator import TeslaDataCoordinator
 
+CHARGING_AMPS_MIN = 5
+CHARGING_AMPS_MAX = 10
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -63,8 +66,8 @@ class TeslaChargingAmpsNumber(CoordinatorEntity[TeslaDataCoordinator], NumberEnt
     _attr_has_entity_name = True
     _attr_name = "Ladestrom"
     _attr_icon = "mdi:current-ac"
-    _attr_native_min_value = 1
-    _attr_native_max_value = 32
+    _attr_native_min_value = CHARGING_AMPS_MIN
+    _attr_native_max_value = CHARGING_AMPS_MAX
     _attr_native_step = 1
     _attr_native_unit_of_measurement = UnitOfElectricCurrent.AMPERE
     _attr_mode = NumberMode.SLIDER
@@ -87,12 +90,13 @@ class TeslaChargingAmpsNumber(CoordinatorEntity[TeslaDataCoordinator], NumberEnt
     @property
     def native_max_value(self) -> float:
         if self.coordinator.data:
-            return float(
+            vehicle_max = float(
                 self.coordinator.data.get("charge_state", {}).get(
-                    "charge_current_request_max", 32
+                    "charge_current_request_max", CHARGING_AMPS_MAX
                 )
             )
-        return 32.0
+            return min(vehicle_max, float(CHARGING_AMPS_MAX))
+        return float(CHARGING_AMPS_MAX)
 
     @property
     def native_value(self) -> float | None:
@@ -101,4 +105,8 @@ class TeslaChargingAmpsNumber(CoordinatorEntity[TeslaDataCoordinator], NumberEnt
         return self.coordinator.data.get("charge_state", {}).get("charge_current_request")
 
     async def async_set_native_value(self, value: float) -> None:
+        if value < CHARGING_AMPS_MIN or value > CHARGING_AMPS_MAX:
+            raise ValueError(
+                f"Ladestrom muss zwischen {CHARGING_AMPS_MIN}A und {CHARGING_AMPS_MAX}A liegen."
+            )
         await self.coordinator.async_command("CHARGING_AMPS", charging_amps=int(value))

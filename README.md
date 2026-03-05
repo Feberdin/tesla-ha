@@ -76,7 +76,7 @@ Vollständige Tesla-Integration für Home Assistant — **kostenlos**, kein Flee
 | Lenkradheizung | Switch | Lenkradheizung ein-/ausschalten |
 | Maximal-Heizung | Switch | Alle Heizungen auf Maximum (Enteisen) |
 | Ladelimit | Number | Ladelimit 50–100 % |
-| Ladestrom | Number | Ladestrom 1 A – max. A des Fahrzeugs |
+| Ladestrom | Number | Ladestrom 5 A – 10 A |
 | Sitzheizung Fahrer | Select | Aus / Stufe 1 / Stufe 2 / Stufe 3 |
 | Sitzheizung Beifahrer | Select | Aus / Stufe 1 / Stufe 2 / Stufe 3 |
 | Sitzheizung Fond Links | Select | Aus / Stufe 1 / Stufe 2 / Stufe 3 |
@@ -103,7 +103,7 @@ Die Integration kann folgende Funktionen aktiv steuern:
 
 - Klima: Standheizung/Klimaanlage ein- und ausschalten, Zieltemperatur setzen (15–28 °C)
 - Fahrzeugzugriff: Verriegeln und Entriegeln
-- Laden: Laden starten/stoppen, Ladelimit setzen, Ladestrom einstellen
+- Laden: Laden starten/stoppen, Ladelimit setzen, Ladestrom einstellen (5 A – 10 A)
 - Sicherheit/Komfort: Sentry Mode, Lenkradheizung, Maximal-Heizung (Defrost)
 - Sitze: Sitzheizungen (vorn + hinten) und je nach Fahrzeug Sitzkühlung (vorn)
 - Fahrzeugaktionen: Lichter blinken, Hupe, Frunk öffnen, Kofferraum öffnen
