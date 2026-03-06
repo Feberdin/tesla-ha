@@ -1,0 +1,25 @@
+name: HACS Validation
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  hacs:
+    name: Run HACS validation
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout repository content for validation.
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Validate repository against HACS requirements.
+      - name: HACS Action
+        uses: hacs/action@main
+        with:
+          category: integration

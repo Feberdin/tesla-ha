@@ -1,0 +1,23 @@
+name: Hassfest
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  hassfest:
+    name: Run hassfest validation
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout repository content for validation.
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Validate Home Assistant integration structure and manifest.
+      - name: Hassfest
+        uses: home-assistant/actions/hassfest@master
