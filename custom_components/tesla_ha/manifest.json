@@ -1,7 +1,7 @@
 {
   "domain": "tesla_ha",
   "name": "Tesla",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "documentation": "https://github.com/Feberdin/tesla-ha",
   "issue_tracker": "https://github.com/Feberdin/tesla-ha/issues",
   "requirements": ["teslapy==2.9.0"],
