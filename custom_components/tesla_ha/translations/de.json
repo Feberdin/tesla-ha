@@ -10,7 +10,7 @@
       },
       "auth": {
         "title": "Tesla Authentifizierung",
-        "description": "**Schritt 1:** Öffne folgenden Link in deinem Browser und melde dich mit deinem Tesla-Konto an:\n\n[Tesla Login öffnen]({auth_url})\n\n**Schritt 2:** Nach dem Login wirst du auf eine leere Seite weitergeleitet.\n\n**Schritt 3:** Kopiere die vollständige URL aus der Adressleiste (beginnt mit `https://auth.tesla.com/void/callback?code=...`) und füge sie unten ein.",
+        "description": "**Schritt 1:** Öffne folgenden Link in deinem Browser und melde dich mit deinem Tesla-Konto an:\n\n[Tesla Login öffnen]({auth_url})\n\n**Schritt 2:** Nach dem Login wirst du auf eine leere Seite weitergeleitet.\n\n**Schritt 3:** Kopiere die vollständige Callback-Adresse aus der Adresszeile (mit Parameter `code=...`) und füge sie unten ein.",
         "data": {
           "callback_url": "Callback URL"
         }
