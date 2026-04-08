@@ -1,82 +1,65 @@
-# Contributing to tesla-ha
+# Contributing
 
-Danke, dass du zu `Feberdin/tesla-ha` beitragen möchtest.
+Dieses Repository enthaelt eine HACS-kompatible Home Assistant Integration fuer Tesla-Fahrzeuge.
+Beitraege sollen die Integration robuster, besser dokumentiert und leichter wartbar machen.
 
-## Ziel des Projekts
+## Scope
 
-Diese Integration soll Tesla-Daten und -Steuerung in Home Assistant zuverlässig,
-nachvollziehbar und für Nicht-Programmierer nutzbar machen.
+Sinnvolle Beitraege verbessern mindestens einen dieser Bereiche:
 
-## Voraussetzungen
+- Stabilitaet und Fehlerbehandlung der Integration
+- Nachvollziehbarkeit der Home Assistant Entitaeten und Steuerfunktionen
+- Einrichtungs- und Betriebsdokumentation
+- HACS-, Hassfest- und Repository-Qualitaet
 
-- Python 3.11+
-- Home Assistant Core Entwicklungsumgebung
-- GitHub Account
+## Lokaler Workflow
 
-## Lokale Entwicklung
-
-1. Fork erstellen und klonen.
-2. Branch erstellen:
-   - `feature/<kurze-beschreibung>`
-   - `fix/<kurze-beschreibung>`
-3. Abhängigkeiten installieren (Beispiel):
+1. Erstelle einen Branch mit klarem Scope, zum Beispiel `fix/wakeup-timeout` oder `docs/readme-cleanup`.
+2. Halte Aenderungen klein und zusammenhaengend.
+3. Pruefe bei Doku-Aenderungen, ob README und Screenshots wirklich zum aktuellen Code passen.
+4. Fuehre mindestens den Syntax-Check lokal aus:
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -U pip
-pip install -r requirements-dev.txt
-```
-
-Falls `requirements-dev.txt` noch fehlt, bitte die benötigten Pakete im PR
-klar benennen.
-
-## Coding Guidelines
-
-- Kleine, klar benannte Funktionen
-- Defensive Fehlerbehandlung mit klaren Log-Meldungen
-- Keine Secrets, Tokens oder persönliche Daten committen
-- API-Änderungen in README dokumentieren
-- Nutzerwirkung von Änderungen im PR erklären
-
-## Tests
-
-Vor jedem PR bitte lokal ausführen:
-
-```bash
-pytest -q
 python3 -m compileall -q custom_components
 ```
 
-Mindestens:
+5. Oeffne einen Pull Request mit einer kurzen Beschreibung:
+   - was geaendert wurde
+   - warum es geaendert wurde
+   - wie es geprueft wurde
 
-- Happy-Path Test(s)
-- Wichtige Edge Cases
-- 1-2 Negativtests
+## Validierung
 
-## Commit- und PR-Richtlinien
+Dieses Repository hat aktuell keine eingecheckte lokale Test-Suite.
+Verfuegbare Qualitaetssicherung ist derzeit:
 
-- Aussagekräftige Commit Messages, z. B.:
-  - `feat: add seat cooling detection`
+- lokaler Syntax-Check ueber `python3 -m compileall -q custom_components`
+- GitHub Actions fuer `hassfest`
+- GitHub Actions fuer `hacs`
+- manuelle Pruefung in Home Assistant bei Aenderungen am Config Flow oder an Entitaeten
+
+> TODO: Eine committed Test-Suite fuer Kernlogik und Config Flow waere ein sinnvoller naechster Ausbau.
+
+## Stilrichtlinien
+
+- Dokumentiere nur Verhalten, das im Repository wirklich existiert.
+- Erfinde keine Features, Konfigurationen oder Installationswege in der Doku.
+- Halte Commit-Nachrichten kurz und eindeutig, zum Beispiel:
   - `fix: handle wake-up timeout gracefully`
-- Ein PR sollte ein Thema behandeln (kein Big-Bang).
-- PR-Beschreibung enthält:
-  - Was wurde geändert?
-  - Warum wurde es geändert?
-  - Wie wurde es getestet?
-  - Gibt es Risiken oder Breaking Changes?
+  - `docs: restructure readme for hacs release`
+- Kennzeichne externe Karten, Bilder oder Dashboard-Elemente klar, wenn sie nicht Teil dieser Integration sind.
+- Committe niemals Tokens, lokale `cache.json` Dateien oder andere sensible Daten.
 
-## Review-Erwartung
+## Pull Requests
 
-Wir reviewen auf:
+Ein guter Pull Request ist:
 
-- Korrektheit
-- Lesbarkeit
-- Robustheit/Fehlerfälle
-- Testabdeckung
-- Nutzerverständlichkeit (README/Logs/Fehlermeldungen)
+- fachlich klar abgegrenzt
+- fuer Reviewer schnell nachvollziehbar
+- mit angepasster Dokumentation, wenn sich Verhalten oder Einrichtung aendert
+- ohne unnoetige Nebenbaustellen
 
-## Security
+## Fragen und Abstimmung
 
-Bitte melde Sicherheitslücken **nicht** als öffentliches Issue.
-Siehe Security Policy: `.github/SECURITY.md`.
+Wenn unklar ist, ob eine Aenderung in dieses Repository gehoert, nutze zuerst ein Issue oder eine PR-Beschreibung zur Einordnung.
+Das hilft besonders bei Themen wie neuem Branding, zusaetzlichen Dokumentationsseiten oder groesseren funktionalen Erweiterungen.
