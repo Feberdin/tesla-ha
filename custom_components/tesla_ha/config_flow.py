@@ -1,18 +1,38 @@
+"""Home Assistant setup flow for Tesla account authentication.
+
+Purpose:
+    Guides users through Tesla OAuth and stores the resulting token cache in
+    the config entry for later use by the coordinator.
+
+Input / Output:
+    Input is the Tesla account email and the callback URL copied after login.
+    Output is a Home Assistant config entry containing the email and token
+    cache. Token values are never logged.
+
+Important invariants:
+    Each generated Tesla login URL has a one-time PKCE verifier and OAuth
+    state. Callback URLs must match that state before token exchange.
+
+Debugging:
+    Enable debug logging for `custom_components.tesla_ha`. Failed auth logs
+    contain the reason class and context, not token contents.
+"""
+
 from __future__ import annotations
 
-import base64
-import json
 import logging
-import os
-import tempfile
 from typing import Any
 
-import teslapy
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.data_entry_flow import FlowResult
 
 from .const import DOMAIN
+from .tesla_owner import (
+    TeslaOAuthSession,
+    create_oauth_session,
+    exchange_authorization_response,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -22,7 +42,7 @@ class TeslaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     def __init__(self) -> None:
         self._email: str | None = None
-        self._code_verifier_b64: str | None = None
+        self._code_verifier: str | None = None
         self._state: str | None = None
         self._auth_url: str | None = None
 
@@ -47,20 +67,12 @@ class TeslaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             callback_url = user_input.get("callback_url", "").strip()
 
             def _exchange_token() -> dict:
-                fd, cache_file = tempfile.mkstemp(suffix=".json")
-                os.close(fd)
-                with open(cache_file, "w") as f:
-                    f.write("{}")
-                try:
-                    with teslapy.Tesla(self._email, cache_file=cache_file) as tesla:
-                        tesla._state = self._state
-                        tesla.code_verifier = base64.b64decode(self._code_verifier_b64)
-                        tesla.fetch_token(authorization_response=callback_url)
-                    with open(cache_file) as f:
-                        return json.load(f)
-                finally:
-                    if os.path.exists(cache_file):
-                        os.unlink(cache_file)
+                return exchange_authorization_response(
+                    self._email or "",
+                    callback_url,
+                    self._code_verifier or "",
+                    self._state or "",
+                )
 
             try:
                 cache_data = await self.hass.async_add_executor_job(_exchange_token)
@@ -75,26 +87,19 @@ class TeslaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             except config_entries.data_entry_flow.AbortFlow:
                 raise
             except Exception as e:
-                _LOGGER.exception("Authentifizierung fehlgeschlagen: %s", e)
+                _LOGGER.exception("Tesla Authentifizierung fehlgeschlagen: %s", e)
                 errors["base"] = "invalid_auth"
 
         if self._auth_url is None:
             def _get_auth_url() -> tuple[str, str, str]:
-                fd, cache_file = tempfile.mkstemp(suffix=".json")
-                os.close(fd)
-                with open(cache_file, "w") as f:
-                    f.write("{}")
-                try:
-                    with teslapy.Tesla(self._email, cache_file=cache_file) as tesla:
-                        url = tesla.authorization_url()
-                        verifier_b64 = base64.b64encode(tesla.code_verifier).decode()
-                        state = tesla._state
-                        return url, verifier_b64, state
-                finally:
-                    if os.path.exists(cache_file):
-                        os.unlink(cache_file)
+                oauth_session: TeslaOAuthSession = create_oauth_session()
+                return (
+                    oauth_session.authorization_url,
+                    oauth_session.code_verifier,
+                    oauth_session.state,
+                )
 
-            self._auth_url, self._code_verifier_b64, self._state = (
+            self._auth_url, self._code_verifier, self._state = (
                 await self.hass.async_add_executor_job(_get_auth_url)
             )
 

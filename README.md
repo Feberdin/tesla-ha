@@ -11,8 +11,8 @@
 <h1 align="center">Tesla fuer Home Assistant</h1>
 
 <p align="center">
-  Kostenlose HACS-Integration fuer Tesla-Fahrzeuge ueber die inoffizielle Tesla Owner API.
-  Kein Fleet API Abo, kein Developer-Account.
+  HACS-Integration fuer Tesla-Fahrzeuge ueber die Legacy Tesla Owner API mit HTTP/2 und TLS 1.3.
+  Best-effort ohne Fleet API Abo, solange Tesla den jeweiligen Account/Endpunkt noch zulaesst.
 </p>
 
 <p align="center">
@@ -38,15 +38,16 @@
 
 ## Overview
 
-`tesla-ha` ist eine Home Assistant Custom Integration fuer Tesla-Fahrzeuge. Die Integration bindet die inoffizielle Tesla Owner API ueber `teslapy` an, richtet sich ueber einen eingebauten Config Flow ein und stellt Fahrzeugdaten sowie Steuerfunktionen direkt als Home Assistant Entitaeten bereit.
+`tesla-ha` ist eine Home Assistant Custom Integration fuer Tesla-Fahrzeuge. Die Integration bindet die Legacy Tesla Owner API ueber einen eigenen HTTP/2-faehigen Client an, richtet sich ueber einen eingebauten Config Flow ein und stellt Fahrzeugdaten sowie Steuerfunktionen direkt als Home Assistant Entitaeten bereit.
 
-Der Fokus des Projekts liegt auf einer kostenlosen, nachvollziehbaren und alltagstauglichen Tesla-Anbindung fuer Home Assistant. Sensorik und Bedienung sollen ohne Fleet API Abo, ohne Developer-Account und ohne zusaetzliche externe Dienste nutzbar sein.
+Der Fokus des Projekts liegt auf einer kostenlosen, nachvollziehbaren und alltagstauglichen Tesla-Anbindung fuer Home Assistant. Seit Teslas Umstellung auf Fleet API und signierte Commands ist diese Integration technisch ein Best-effort-Legacy-Weg: Datenabruf und einfache Befehle funktionieren nur, solange Tesla den Owner API Zugriff fuer den Account und das Fahrzeug erlaubt.
 
 ---
 
 ## Features
 
 - OAuth2 PKCE Config Flow direkt in Home Assistant
+- HTTP/2-Client mit TLS 1.3 fuer Tesla Auth- und Owner-API-Hosts
 - 23 Sensoren fuer Ladezustand, Temperaturen, Reifendruck, Medienstatus und Fahrzeugdaten
 - 22 Binaersensoren fuer Tueren, Fenster, Laden, Klima, Sentry Mode und Reifendruckwarnungen
 - Steuerung fuer Klima, Laden, Verriegelung, Sitzheizung, Sitzkuehlung, Medien und Komfortfunktionen
@@ -248,10 +249,20 @@ UPDATE_INTERVAL = 5  # minutes
 Die Integration verwendet einen eingebauten OAuth2 PKCE Flow in [config_flow.py](custom_components/tesla_ha/config_flow.py).
 Das Token wird nach erfolgreichem Abschluss in Home Assistant gespeichert.
 
+Seit Juni 2026 lehnen Tesla-Endpunkte haeufig alte HTTP/1.1-Clients oder nicht mehr erlaubte Owner-API-Zugriffe mit `403` ab. Diese Integration nutzt deshalb [tesla_owner.py](custom_components/tesla_ha/tesla_owner.py) statt `teslapy` und spricht Tesla Auth/Owner API mit HTTP/2 und TLS 1.3 an. Wenn Tesla danach weiter auf Fleet API verweist, ist das kein lokaler Tokenfehler, sondern eine serverseitige Einschraenkung des Legacy-Zugriffs.
+
 ### Lokale Entwicklung
 
 Fuer lokale Entwicklung kann eine `cache.json` mit Tesla-Tokens existieren.
 Diese Datei darf nicht committed oder veroeffentlicht werden.
+
+Lokale Pruefung ohne echte Tesla-Zugangsdaten:
+
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install pytest "httpx[http2]==0.28.1"
+.venv/bin/python -m pytest tests/test_tesla_owner.py -q
+```
 
 ---
 
@@ -324,7 +335,8 @@ automation:
 Die Integration ist bewusst kompakt aufgebaut:
 
 - [config_flow.py](custom_components/tesla_ha/config_flow.py) implementiert den Login ueber OAuth2 PKCE
-- [coordinator.py](custom_components/tesla_ha/coordinator.py) kapselt Abrufe, Wake-up-Logik und Tesla-Befehle ueber `teslapy`
+- [tesla_owner.py](custom_components/tesla_ha/tesla_owner.py) kapselt Tesla Auth, Token-Refresh, Owner-API-Aufrufe und sichere Fehlermeldungen
+- [coordinator.py](custom_components/tesla_ha/coordinator.py) kapselt Abrufe, Wake-up-Logik und Tesla-Befehle ueber den Owner-Client
 - Die Plattformdateien unter `custom_components/tesla_ha/` definieren die Home Assistant Entitaeten fuer Sensoren und Steuerung
 
 Der Coordinator arbeitet mit `DataUpdateCoordinator` und fuehrt synchrone Tesla-API-Aufrufe ueber `hass.async_add_executor_job` aus.
@@ -336,7 +348,8 @@ Der Coordinator arbeitet mit `DataUpdateCoordinator` und fuehrt synchrone Tesla-
 ### Bekannte Einschraenkungen
 
 - Aktuell wird nur das erste gefundene Fahrzeug verwendet (`vehicles[0]`)
-- Neuere Fahrzeuge koennen Befehle wegen Teslas Command-Signing-Protokoll ablehnen
+- Neuere Fahrzeuge und viele seit Ende 2023 ausgelieferte Fahrzeuge koennen Befehle wegen Teslas Command-Signing-Protokoll ablehnen
+- Tesla kann den Legacy Owner API Zugriff trotz HTTP/2/TLS 1.3 account- oder endpointseitig blockieren
 - Das Aufwecken eines schlafenden Fahrzeugs kann bis zu rund zwei Minuten dauern
 
 ### Haeufige Probleme
@@ -345,8 +358,12 @@ Der Coordinator arbeitet mit `DataUpdateCoordinator` und fuehrt synchrone Tesla-
   Stelle sicher, dass `https://github.com/Feberdin/tesla-ha` als Custom Repository eingetragen ist.
 - Callback-URL wird nicht akzeptiert:
   Der Login-Link ist nur einmal gueltig. Starte den Config Flow erneut, um einen neuen Link zu erhalten.
+- Fehler `403` mit Hinweis auf `developer.tesla.com/docs/fleet-api`:
+  Tesla blockiert den Legacy Owner API Zugriff fuer diesen Account oder Endpunkt. Fuer dauerhaft unterstuetzten Betrieb ist Teslas Fleet API mit Developer-App, passenden Scopes und ggf. Virtual Key erforderlich.
 - Befehle funktionieren nicht, Sensoren aber schon:
-  Das spricht oft fuer Command-Signing-Einschraenkungen bei neueren Fahrzeugen.
+  Das spricht oft fuer Command-Signing-Einschraenkungen bei neueren Fahrzeugen. Datenabruf kann weiter funktionieren, waehrend Steuerbefehle eine Fleet-/Virtual-Key-Loesung brauchen.
+- Token-Refresh schlaegt fehl:
+  Pruefe Home-Assistant-Logs auf `Tesla auth request`. Wenn der Fehler nach Neustart bleibt, entferne die Integration und richte sie mit einem frischen Tesla-Login neu ein.
 - Fahrzeug wacht nicht auf:
   Pruefe Mobilfunk- oder WLAN-Empfang des Fahrzeugs und gib dem Wake-up etwas Zeit.
 
@@ -358,6 +375,7 @@ Der Coordinator arbeitet mit `DataUpdateCoordinator` und fuehrt synchrone Tesla-
 tesla-ha/
 ├── .github/workflows/              # HACS- und Hassfest-Validierung
 ├── assets/screenshots/             # README-Screenshots
+├── docs/                           # Setup- und Migrationsdokumentation
 ├── custom_components/tesla_ha/     # Home Assistant Integration
 │   ├── brand/                      # HACS/Home Assistant Brand-Assets
 │   ├── translations/               # de/en Config-Flow Uebersetzungen
@@ -379,10 +397,12 @@ tesla-ha/
 
 ### Vorgeschlagene Doku- und Asset-Struktur
 
-Diese Struktur existiert noch nicht vollstaendig im Repository und ist als Ausbaupfad gedacht:
+Die `docs/`-Struktur ist jetzt als Ausgangspunkt vorhanden und kann bei Bedarf weiter ausgebaut werden:
 
 ```text
-docs/                              # TODO
+docs/
+├── SETUP.md
+├── MIGRATION.md
 ├── installation.md
 ├── configuration.md
 ├── automations.md
@@ -392,7 +412,7 @@ assets/branding/                   # TODO
 └── readme-banner.png
 ```
 
-> TODO: Sobald die README weiter waechst, sollten Installationsanleitung, Automationsbeispiele und Troubleshooting in `docs/` ausgelagert werden.
+> TODO: Falls die Projektdoku weiter waechst, sollten Installationsanleitung, Automationsbeispiele und Troubleshooting schrittweise in eigene Dateien unter `docs/` ausgelagert werden.
 
 ---
 

@@ -17,10 +17,13 @@ Sinnvolle Beitraege verbessern mindestens einen dieser Bereiche:
 1. Erstelle einen Branch mit klarem Scope, zum Beispiel `fix/wakeup-timeout` oder `docs/readme-cleanup`.
 2. Halte Aenderungen klein und zusammenhaengend.
 3. Pruefe bei Doku-Aenderungen, ob README und Screenshots wirklich zum aktuellen Code passen.
-4. Fuehre mindestens den Syntax-Check lokal aus:
+4. Fuehre mindestens Syntax-Check und Unit-Tests lokal aus:
 
 ```bash
-python3 -m compileall -q custom_components
+python3 -m venv .venv
+.venv/bin/python -m pip install pytest "httpx[http2]==0.28.1"
+.venv/bin/python -m compileall -q custom_components tests
+.venv/bin/python -m pytest tests/test_tesla_owner.py -q
 ```
 
 5. Oeffne einen Pull Request mit einer kurzen Beschreibung:
@@ -30,15 +33,13 @@ python3 -m compileall -q custom_components
 
 ## Validierung
 
-Dieses Repository hat aktuell keine eingecheckte lokale Test-Suite.
 Verfuegbare Qualitaetssicherung ist derzeit:
 
-- lokaler Syntax-Check ueber `python3 -m compileall -q custom_components`
+- lokaler Syntax-Check ueber `.venv/bin/python -m compileall -q custom_components tests`
+- Unit-Tests fuer die Tesla Owner API Kernlogik ueber `.venv/bin/python -m pytest tests/test_tesla_owner.py -q`
 - GitHub Actions fuer `hassfest`
 - GitHub Actions fuer `hacs`
 - manuelle Pruefung in Home Assistant bei Aenderungen am Config Flow oder an Entitaeten
-
-> TODO: Eine committed Test-Suite fuer Kernlogik und Config Flow waere ein sinnvoller naechster Ausbau.
 
 ## Stilrichtlinien
 
