@@ -21,9 +21,9 @@ Sinnvolle Beitraege verbessern mindestens einen dieser Bereiche:
 
 ```bash
 python3 -m venv .venv
-.venv/bin/python -m pip install pytest "httpx[http2]==0.28.1"
+.venv/bin/python -m pip install pytest tesla-fleet-api==1.4.7
 .venv/bin/python -m compileall -q custom_components tests
-.venv/bin/python -m pytest tests/test_tesla_owner.py -q
+.venv/bin/python -m pytest tests/test_tesla_fleet.py -q
 ```
 
 5. Oeffne einen Pull Request mit einer kurzen Beschreibung:
@@ -36,7 +36,7 @@ python3 -m venv .venv
 Verfuegbare Qualitaetssicherung ist derzeit:
 
 - lokaler Syntax-Check ueber `.venv/bin/python -m compileall -q custom_components tests`
-- Unit-Tests fuer die Tesla Owner API Kernlogik ueber `.venv/bin/python -m pytest tests/test_tesla_owner.py -q`
+- Unit-Tests fuer die Tesla Fleet Kernlogik ueber `.venv/bin/python -m pytest tests/test_tesla_fleet.py -q`
 - GitHub Actions fuer `hassfest`
 - GitHub Actions fuer `hacs`
 - manuelle Pruefung in Home Assistant bei Aenderungen am Config Flow oder an Entitaeten
@@ -49,7 +49,7 @@ Verfuegbare Qualitaetssicherung ist derzeit:
   - `fix: handle wake-up timeout gracefully`
   - `docs: restructure readme for hacs release`
 - Kennzeichne externe Karten, Bilder oder Dashboard-Elemente klar, wenn sie nicht Teil dieser Integration sind.
-- Committe niemals Tokens, lokale `cache.json` Dateien oder andere sensible Daten.
+- Committe niemals Tokens, Client Secrets, private Keys oder andere sensible Daten.
 
 ## Pull Requests
 

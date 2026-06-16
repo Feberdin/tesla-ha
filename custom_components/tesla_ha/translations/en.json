@@ -1,28 +1,41 @@
 {
   "config": {
     "step": {
-      "user": {
-        "title": "Tesla Account",
-        "description": "Enter your Tesla account email address.",
+      "pick_implementation": {
+        "title": "Select Tesla Fleet application"
+      },
+      "domain_input": {
+        "title": "Register Tesla Fleet domain",
+        "description": "Enter the public domain that hosts the Tesla public key. This domain must be configured as an allowed origin in the Tesla Developer Portal: {dashboard}",
         "data": {
-          "email": "Email Address"
+          "domain": "Domain"
         }
       },
-      "auth": {
-        "title": "Tesla Authentication",
-        "description": "**Step 1:** Open the following link in your browser and sign in with your Tesla account:\n\n[Open Tesla Login]({auth_url})\n\n**Step 2:** After login you will be redirected to a blank page.\n\n**Step 3:** Copy the full callback address from the browser address bar (including parameter `code=...`) and paste it below.",
-        "data": {
-          "callback_url": "Callback URL"
-        }
+      "domain_registration": {
+        "title": "Host Tesla public key",
+        "description": "Place the following public key exactly at `{public_key_url}` and continue afterwards.\n\n```text\n{pem}\n```"
+      },
+      "registration_complete": {
+        "title": "Pair Virtual Key",
+        "description": "Open this link and add the Virtual Key in the Tesla app so signed vehicle commands can work:\n\n{virtual_key_url}"
+      },
+      "reauth_confirm": {
+        "title": "Reconnect Tesla Fleet",
+        "description": "Tesla requires a new login for {name}."
       }
     },
     "error": {
-      "invalid_auth": "Authentication failed. Please try again with a new URL.",
-      "no_vehicles": "No vehicles found in Tesla account.",
+      "invalid_domain": "Invalid domain. Enter only the host name without https:// and without a path.",
+      "invalid_response": "Tesla did not return a valid partner registration response.",
+      "oauth_error": "Tesla Fleet OAuth failed. Check client ID, client secret and allowed origin.",
+      "precondition_failed": "Tesla rejected the domain. Check the allowed origin and public-key URL in the Tesla Developer Portal.",
+      "public_key_mismatch": "The public key read by Tesla does not match the local key.",
+      "public_key_not_found": "Tesla could not fetch a public key for this domain.",
       "unknown": "An unknown error occurred."
     },
     "abort": {
-      "already_configured": "Tesla is already configured."
+      "already_configured": "Tesla Fleet is already configured.",
+      "oauth_error": "Tesla Fleet OAuth failed."
     }
   }
 }

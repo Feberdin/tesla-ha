@@ -11,8 +11,8 @@
 <h1 align="center">Tesla fuer Home Assistant</h1>
 
 <p align="center">
-  HACS-Integration fuer Tesla-Fahrzeuge ueber die Legacy Tesla Owner API mit HTTP/2 und TLS 1.3.
-  Best-effort ohne Fleet API Abo, solange Tesla den jeweiligen Account/Endpunkt noch zulaesst.
+  HACS-Integration fuer Tesla-Fahrzeuge ueber die offizielle Tesla Fleet API.
+  Owner API wurde entfernt, weil Tesla den Legacy-Zugriff fuer betroffene Accounts mit 403 blockiert.
 </p>
 
 <p align="center">
@@ -31,27 +31,29 @@
   <a href="LICENSE">
     <img src="https://img.shields.io/github/license/Feberdin/tesla-ha?style=for-the-badge" alt="License" />
   </a>
-  <img src="https://img.shields.io/badge/Home%20Assistant-2023.1.0%2B-18BCF2?style=for-the-badge&logo=home-assistant&logoColor=white" alt="Home Assistant 2023.1.0+" />
+  <img src="https://img.shields.io/badge/Home%20Assistant-2025.1.0%2B-18BCF2?style=for-the-badge&logo=home-assistant&logoColor=white" alt="Home Assistant 2025.1.0+" />
 </p>
 
 ---
 
 ## Overview
 
-`tesla-ha` ist eine Home Assistant Custom Integration fuer Tesla-Fahrzeuge. Die Integration bindet die Legacy Tesla Owner API ueber einen eigenen HTTP/2-faehigen Client an, richtet sich ueber einen eingebauten Config Flow ein und stellt Fahrzeugdaten sowie Steuerfunktionen direkt als Home Assistant Entitaeten bereit.
+`tesla-ha` ist eine Home Assistant Custom Integration fuer Tesla-Fahrzeuge. Die Integration nutzt Teslas offizielle Fleet API ueber Home Assistants Application-Credentials- und OAuth-Flow, richtet eine Fleet-Partnerdomain ein und stellt Fahrzeugdaten sowie Steuerfunktionen als Home Assistant Entitaeten bereit.
 
-Der Fokus des Projekts liegt auf einer kostenlosen, nachvollziehbaren und alltagstauglichen Tesla-Anbindung fuer Home Assistant. Seit Teslas Umstellung auf Fleet API und signierte Commands ist diese Integration technisch ein Best-effort-Legacy-Weg: Datenabruf und einfache Befehle funktionieren nur, solange Tesla den Owner API Zugriff fuer den Account und das Fahrzeug erlaubt.
+Der Fokus des Projekts liegt auf einer nachvollziehbaren und wartbaren Tesla-Anbindung fuer Home Assistant. Seit Teslas Umstellung auf Fleet API und signierte Commands benoetigt der Betrieb eine Tesla Developer App, passende Scopes, eine registrierte Public-Key-Domain und fuer viele Fahrzeuge einen gekoppelten Virtual Key.
 
 ---
 
 ## Features
 
-- OAuth2 PKCE Config Flow direkt in Home Assistant
-- HTTP/2-Client mit TLS 1.3 fuer Tesla Auth- und Owner-API-Hosts
+- Home Assistant Application Credentials fuer Tesla Client ID und Client Secret
+- Offizieller Tesla Fleet OAuth Flow mit `tesla-fleet-api`
+- Partner-Domainregistrierung mit lokal erzeugtem Public/Private-Key-Paar
+- Virtual-Key-Hinweis fuer signierte Fahrzeugbefehle
 - 23 Sensoren fuer Ladezustand, Temperaturen, Reifendruck, Medienstatus und Fahrzeugdaten
 - 22 Binaersensoren fuer Tueren, Fenster, Laden, Klima, Sentry Mode und Reifendruckwarnungen
 - Steuerung fuer Klima, Laden, Verriegelung, Sitzheizung, Sitzkuehlung, Medien und Komfortfunktionen
-- Wake-up-Logik fuer schlafende Fahrzeuge vor Datenabruf und Befehlen
+- Wake-up-Logik fuer schlafende Fahrzeuge vor expliziten Befehlen
 - Deutsche und englische UI-Texte fuer den Einrichtungsdialog
 - HACS-kompatible Repository-Struktur inklusive Brand-Assets und Validierungs-Workflows
 
@@ -83,9 +85,11 @@ Die Bilder zeigen Home Assistant Karten mit Entitaeten dieser Integration.
 
 ### Voraussetzungen
 
-- Home Assistant `2023.1.0` oder neuer
+- Home Assistant `2025.1.0` oder neuer
 - [HACS](https://hacs.xyz) installiert
 - Tesla-Account
+- Tesla Developer App mit Client ID und Client Secret
+- Oeffentliche HTTPS-Domain, die den Tesla Public Key unter `/.well-known/appspecific/com.tesla.3p.public-key.pem` ausliefert
 
 ### HACS Installation
 
@@ -98,13 +102,15 @@ Die Bilder zeigen Home Assistant Karten mit Entitaeten dieser Integration.
 
 ### Einrichtung in Home Assistant
 
-1. Oeffne `Einstellungen -> Geraete & Dienste`.
-2. Waehle `+ Integration hinzufuegen` und suche nach `Tesla`.
-3. Gib deine Tesla E-Mail-Adresse ein.
-4. Oeffne den angezeigten Login-Link in einem neuen Browser-Tab.
-5. Melde dich mit deinem Tesla-Account an.
-6. Nach dem Redirect kopierst du die komplette Callback-URL aus der Adresszeile.
-7. Fuege die URL in Home Assistant ein und schliesse den Flow ab.
+1. Oeffne `Einstellungen -> Geraete & Dienste -> Drei-Punkte-Menue -> Application Credentials`.
+2. Lege fuer `Tesla` / `tesla_ha` die Client ID und das Client Secret aus dem Tesla Developer Portal an.
+3. Oeffne `Einstellungen -> Geraete & Dienste`.
+4. Waehle `+ Integration hinzufuegen` und suche nach `Tesla`.
+5. Folge dem Tesla OAuth Login.
+6. Gib im Domain-Schritt die oeffentliche Domain ein, die den Tesla Public Key hostet.
+7. Lege den angezeigten Public Key exakt unter der angezeigten Well-Known-URL ab.
+8. Schließe die Partnerregistrierung ab.
+9. Oeffne den angezeigten Virtual-Key-Link und fuege den Schluessel in der Tesla-App hinzu.
 
 Nach erfolgreicher Einrichtung erscheint das Fahrzeug unter `Einstellungen -> Geraete & Dienste -> Tesla`.
 
@@ -235,33 +241,39 @@ Nach erfolgreicher Einrichtung erscheint das Fahrzeug unter `Einstellungen -> Ge
 
 ### Update-Intervall
 
-Das Datenupdate laeuft standardmaessig alle `5 Minuten`.
+Das Datenupdate laeuft standardmaessig alle `10 Minuten`.
 Der Wert ist in [const.py](custom_components/tesla_ha/const.py) als `UPDATE_INTERVAL` hinterlegt.
 
 ```python
-UPDATE_INTERVAL = 5  # minutes
+UPDATE_INTERVAL = 10  # minutes
 ```
 
-> Hinweis: Haeufige Abfragen koennen den 12V-Akku belasten. Bei kuerzeren Intervallen sollte das Fahrzeug nachts moeglichst nicht dauerhaft gepollt werden.
+> Hinweis: Tesla Fleet `vehicle_data` Abrufe koennen kosten- und rate-limit-relevant sein. Die Integration weckt schlafende Fahrzeuge deshalb nicht mehr fuer normale Polling-Updates, sondern nur bei expliziten Befehlen.
 
 ### Authentifizierung
 
-Die Integration verwendet einen eingebauten OAuth2 PKCE Flow in [config_flow.py](custom_components/tesla_ha/config_flow.py).
-Das Token wird nach erfolgreichem Abschluss in Home Assistant gespeichert.
+Die Integration verwendet Home Assistants Application-Credentials- und OAuth2-Flow in [config_flow.py](custom_components/tesla_ha/config_flow.py).
+Das Token wird nach erfolgreichem Abschluss durch Home Assistant gespeichert und erneuert.
 
-Seit Juni 2026 lehnen Tesla-Endpunkte haeufig alte HTTP/1.1-Clients oder nicht mehr erlaubte Owner-API-Zugriffe mit `403` ab. Diese Integration nutzt deshalb [tesla_owner.py](custom_components/tesla_ha/tesla_owner.py) statt `teslapy` und spricht Tesla Auth/Owner API mit HTTP/2 und TLS 1.3 an. Wenn Tesla danach weiter auf Fleet API verweist, ist das kein lokaler Tokenfehler, sondern eine serverseitige Einschraenkung des Legacy-Zugriffs.
+Seit Version `2.0.0` nutzt die Integration keine Legacy Owner API mehr. Der Tesla Developer Flow benoetigt:
+
+- Client ID und Client Secret aus dem Tesla Developer Portal
+- Scopes `openid`, `offline_access`, `user_data`, `vehicle_device_data`, `vehicle_location`, `vehicle_cmds`, `vehicle_charging_cmds`
+- eine Allowed Origin passend zur Public-Key-Domain
+- einen Public Key unter `https://deine-domain/.well-known/appspecific/com.tesla.3p.public-key.pem`
+- fuer signierte Befehle einen gekoppelten Virtual Key im Fahrzeug
 
 ### Lokale Entwicklung
 
-Fuer lokale Entwicklung kann eine `cache.json` mit Tesla-Tokens existieren.
-Diese Datei darf nicht committed oder veroeffentlicht werden.
+Fuer lokale Entwicklung werden keine echten Tesla-Tokens benoetigt. Application Credentials, OAuth Tokens und private Keys gehoeren ausschliesslich in Home Assistants lokalen Storage und duerfen nicht committed oder veroeffentlicht werden.
 
 Lokale Pruefung ohne echte Tesla-Zugangsdaten:
 
 ```bash
 python3 -m venv .venv
-.venv/bin/python -m pip install pytest "httpx[http2]==0.28.1"
-.venv/bin/python -m pytest tests/test_tesla_owner.py -q
+.venv/bin/python -m pip install pytest tesla-fleet-api==1.4.7
+.venv/bin/python -m compileall -q custom_components tests
+.venv/bin/python -m pytest tests/test_tesla_fleet.py -q
 ```
 
 ---
@@ -334,12 +346,14 @@ automation:
 
 Die Integration ist bewusst kompakt aufgebaut:
 
-- [config_flow.py](custom_components/tesla_ha/config_flow.py) implementiert den Login ueber OAuth2 PKCE
-- [tesla_owner.py](custom_components/tesla_ha/tesla_owner.py) kapselt Tesla Auth, Token-Refresh, Owner-API-Aufrufe und sichere Fehlermeldungen
-- [coordinator.py](custom_components/tesla_ha/coordinator.py) kapselt Abrufe, Wake-up-Logik und Tesla-Befehle ueber den Owner-Client
+- [application_credentials.py](custom_components/tesla_ha/application_credentials.py) verbindet Home Assistant Application Credentials mit Tesla OAuth
+- [oauth.py](custom_components/tesla_ha/oauth.py) definiert Tesla Fleet OAuth-Server, Scopes und Token-Exchange-Parameter
+- [config_flow.py](custom_components/tesla_ha/config_flow.py) implementiert OAuth, Partner-Domainregistrierung und Virtual-Key-Hinweise
+- [tesla_fleet.py](custom_components/tesla_ha/tesla_fleet.py) kapselt Fleet-Datenmapping und Command-Mapping
+- [coordinator.py](custom_components/tesla_ha/coordinator.py) kapselt Fleet-Abrufe, Wake-up-Logik und Tesla-Befehle
 - Die Plattformdateien unter `custom_components/tesla_ha/` definieren die Home Assistant Entitaeten fuer Sensoren und Steuerung
 
-Der Coordinator arbeitet mit `DataUpdateCoordinator` und fuehrt synchrone Tesla-API-Aufrufe ueber `hass.async_add_executor_job` aus.
+Der Coordinator arbeitet mit `DataUpdateCoordinator` und nutzt die asynchrone `tesla-fleet-api` Library, die auch Home Assistants offizielle Tesla-Fleet-Integration verwendet.
 
 ---
 
@@ -348,24 +362,25 @@ Der Coordinator arbeitet mit `DataUpdateCoordinator` und fuehrt synchrone Tesla-
 ### Bekannte Einschraenkungen
 
 - Aktuell wird nur das erste gefundene Fahrzeug verwendet (`vehicles[0]`)
-- Neuere Fahrzeuge und viele seit Ende 2023 ausgelieferte Fahrzeuge koennen Befehle wegen Teslas Command-Signing-Protokoll ablehnen
-- Tesla kann den Legacy Owner API Zugriff trotz HTTP/2/TLS 1.3 account- oder endpointseitig blockieren
-- Das Aufwecken eines schlafenden Fahrzeugs kann bis zu rund zwei Minuten dauern
+- Normale Polling-Updates wecken das Fahrzeug nicht automatisch
+- Signierte Befehle funktionieren nur mit registrierter Domain, gehostetem Public Key und gekoppeltem Virtual Key
+- Tesla Fleet API kann je nach Developer-App, Region und Nutzung kosten- oder rate-limit-relevant sein
+- Das Aufwecken eines schlafenden Fahrzeugs fuer Befehle kann fehlschlagen, wenn Mobile Access deaktiviert ist
 
 ### Haeufige Probleme
 
 - Integration erscheint nicht in HACS:
   Stelle sicher, dass `https://github.com/Feberdin/tesla-ha` als Custom Repository eingetragen ist.
-- Callback-URL wird nicht akzeptiert:
-  Der Login-Link ist nur einmal gueltig. Starte den Config Flow erneut, um einen neuen Link zu erhalten.
-- Fehler `403` mit Hinweis auf `developer.tesla.com/docs/fleet-api`:
-  Tesla blockiert den Legacy Owner API Zugriff fuer diesen Account oder Endpunkt. Fuer dauerhaft unterstuetzten Betrieb ist Teslas Fleet API mit Developer-App, passenden Scopes und ggf. Virtual Key erforderlich.
+- Application Credentials fehlen:
+  Lege Client ID und Client Secret in Home Assistant unter `Application Credentials` fuer diese Integration an.
+- Domainregistrierung schlaegt fehl:
+  Pruefe Allowed Origin im Tesla Developer Portal und ob der Public Key exakt unter der angezeigten Well-Known-URL erreichbar ist.
 - Befehle funktionieren nicht, Sensoren aber schon:
-  Das spricht oft fuer Command-Signing-Einschraenkungen bei neueren Fahrzeugen. Datenabruf kann weiter funktionieren, waehrend Steuerbefehle eine Fleet-/Virtual-Key-Loesung brauchen.
+  Pruefe, ob der Virtual Key ueber `https://www.tesla.com/_ak/deine-domain` gekoppelt wurde und ob die OAuth-Scopes `vehicle_cmds` sowie `vehicle_charging_cmds` erlaubt sind.
 - Token-Refresh schlaegt fehl:
-  Pruefe Home-Assistant-Logs auf `Tesla auth request`. Wenn der Fehler nach Neustart bleibt, entferne die Integration und richte sie mit einem frischen Tesla-Login neu ein.
+  Entferne die Integration und richte sie mit einem frischen Tesla Fleet Login neu ein.
 - Fahrzeug wacht nicht auf:
-  Pruefe Mobilfunk- oder WLAN-Empfang des Fahrzeugs und gib dem Wake-up etwas Zeit.
+  Pruefe Mobile Access, Mobilfunk- oder WLAN-Empfang des Fahrzeugs und gib dem Wake-up etwas Zeit.
 
 ---
 
