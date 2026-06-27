@@ -89,6 +89,8 @@ Die Bilder zeigen Home Assistant Karten mit Entitaeten dieser Integration.
 - [HACS](https://hacs.xyz) installiert
 - Tesla-Account
 - Tesla Developer App mit Client ID und Client Secret
+- OAuth Redirect URI in der Tesla Developer App:
+  `https://my.home-assistant.io/redirect/oauth`
 - Oeffentliche HTTPS-Domain, die den Tesla Public Key unter `/.well-known/appspecific/com.tesla.3p.public-key.pem` ausliefert
 
 ### HACS Installation
@@ -104,6 +106,7 @@ Die Bilder zeigen Home Assistant Karten mit Entitaeten dieser Integration.
 
 1. Oeffne `Einstellungen -> Geraete & Dienste -> Drei-Punkte-Menue -> Application Credentials`.
 2. Lege fuer `Tesla` / `tesla_ha` die Client ID und das Client Secret aus dem Tesla Developer Portal an.
+   Der Dialog zeigt dir die OAuth Redirect URI, die in der Tesla Developer App exakt registriert sein muss.
 3. Oeffne `Einstellungen -> Geraete & Dienste`.
 4. Waehle `+ Integration hinzufuegen` und suche nach `Tesla`.
 5. Folge dem Tesla OAuth Login.
@@ -258,10 +261,17 @@ Das Token wird nach erfolgreichem Abschluss durch Home Assistant gespeichert und
 Seit Version `2.0.0` nutzt die Integration keine Legacy Owner API mehr. Der Tesla Developer Flow benoetigt:
 
 - Client ID und Client Secret aus dem Tesla Developer Portal
+- Redirect URI aus Home Assistant. Standard mit aktivem `my`-Modul:
+  `https://my.home-assistant.io/redirect/oauth`
 - Scopes `openid`, `offline_access`, `user_data`, `vehicle_device_data`, `vehicle_location`, `vehicle_cmds`, `vehicle_charging_cmds`
 - eine Allowed Origin passend zur Public-Key-Domain
 - einen Public Key unter `https://deine-domain/.well-known/appspecific/com.tesla.3p.public-key.pem`
 - fuer signierte Befehle einen gekoppelten Virtual Key im Fahrzeug
+
+Wenn Tesla direkt nach dem Oeffnen der Login-Seite meldet, dass `redirect_uri`
+nicht fuer die `client_id` registriert ist, ist die Tesla Developer App noch
+nicht passend konfiguriert. Trage exakt die von Home Assistant angezeigte
+Redirect URI ein, speichere die App und starte den OAuth-Flow danach erneut.
 
 ### Lokale Entwicklung
 

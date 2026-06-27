@@ -50,6 +50,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import DOMAIN
 from .oauth import TeslaFleetUserImplementation
+from .oauth_redirect import get_oauth_redirect_uri
 from .tesla_fleet import CONF_FLEET_DOMAIN, FLEET_PRIVATE_KEY_FILE
 
 _LOGGER = logging.getLogger(__name__)
@@ -75,6 +76,32 @@ class OAuth2FlowHandler(
         """Return the config-flow logger."""
 
         return _LOGGER
+
+    async def async_step_user(
+        self,
+        user_input: dict[str, Any] | None = None,
+    ) -> ConfigFlowResult:
+        """Show Tesla OAuth redirect guidance before opening Tesla login."""
+
+        return await self.async_step_oauth_redirect_info(user_input)
+
+    async def async_step_oauth_redirect_info(
+        self,
+        user_input: dict[str, Any] | None = None,
+    ) -> ConfigFlowResult:
+        """Explain the redirect URI Tesla must know before OAuth starts."""
+
+        if user_input is not None:
+            return await super().async_step_user()
+
+        return self.async_show_form(
+            step_id="oauth_redirect_info",
+            data_schema=vol.Schema({}),
+            description_placeholders={
+                "dashboard": "https://developer.tesla.com/dashboard",
+                "redirect_uri": get_oauth_redirect_uri(self.hass),
+            },
+        )
 
     async def async_oauth_create_entry(
         self,

@@ -27,6 +27,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_entry_oauth2_flow
 
 from .oauth import TeslaFleetUserImplementation
+from .oauth_redirect import get_oauth_redirect_uri
 
 
 async def async_get_auth_implementation(
@@ -37,3 +38,12 @@ async def async_get_auth_implementation(
     """Return the Tesla Fleet OAuth implementation."""
 
     return TeslaFleetUserImplementation(hass, auth_domain, credential)
+
+
+async def async_get_description_placeholders(hass: HomeAssistant) -> dict[str, str]:
+    """Return placeholders shown in Home Assistant's credentials dialog."""
+
+    return {
+        "dashboard": "https://developer.tesla.com/dashboard",
+        "redirect_uri": get_oauth_redirect_uri(hass),
+    }

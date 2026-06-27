@@ -1,6 +1,13 @@
 {
+  "application_credentials": {
+    "description": "Open your Tesla Developer App in the [Tesla Developer Portal]({dashboard}). Store the client ID and client secret in Home Assistant and also register exactly this OAuth redirect URI in the Tesla app:\n\n`{redirect_uri}`\n\nAllowed origin/public-key domain is a separate Tesla value and does not replace the redirect URI."
+  },
   "config": {
     "step": {
+      "oauth_redirect_info": {
+        "title": "Check Tesla OAuth redirect URI",
+        "description": "Tesla accepts login only when the redirect URI is registered exactly for the client ID being used.\n\nAdd this redirect URI to your app in the [Tesla Developer Portal]({dashboard}):\n\n`{redirect_uri}`\n\nSave the Tesla app and wait briefly before continuing. Allowed origin/public-key domain is also required, but it does not replace this redirect URI."
+      },
       "pick_implementation": {
         "title": "Select Tesla Fleet application"
       },
