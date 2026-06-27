@@ -26,6 +26,7 @@ Debugging:
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Mapping
 import logging
 import re
@@ -47,13 +48,17 @@ from homeassistant.config_entries import SOURCE_REAUTH, ConfigFlowResult
 from homeassistant.const import CONF_DOMAIN
 from homeassistant.helpers import config_entry_oauth2_flow
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.network import NoURLAvailableError
 
 from .const import DOMAIN
 from .oauth import TeslaFleetUserImplementation
+from .oauth_preflight import OAuthPreflightResult, async_check_tesla_authorize_url
 from .oauth_redirect import get_oauth_redirect_uri
 from .tesla_fleet import CONF_FLEET_DOMAIN, FLEET_PRIVATE_KEY_FILE
 
 _LOGGER = logging.getLogger(__name__)
+
+OAUTH_AUTHORIZE_URL_TIMEOUT_SEC = 30
 
 
 class OAuth2FlowHandler(
@@ -99,6 +104,114 @@ class OAuth2FlowHandler(
             data_schema=vol.Schema({}),
             description_placeholders={
                 "dashboard": "https://developer.tesla.com/dashboard",
+                "redirect_uri": get_oauth_redirect_uri(self.hass),
+            },
+        )
+
+    async def async_step_auth(
+        self,
+        user_input: dict[str, Any] | None = None,
+    ) -> ConfigFlowResult:
+        """Preflight Tesla authorize settings before browser redirect."""
+
+        if user_input is not None:
+            return await super().async_step_auth(user_input)
+
+        try:
+            async with asyncio.timeout(OAUTH_AUTHORIZE_URL_TIMEOUT_SEC):
+                authorize_url = await self.async_generate_authorize_url()
+        except TimeoutError as err:
+            _LOGGER.error("Timeout generating Tesla authorize URL: %s", err)
+            return self.async_abort(reason="authorize_url_timeout")
+        except NoURLAvailableError:
+            return self.async_abort(
+                reason="no_url_available",
+                description_placeholders={
+                    "docs_url": (
+                        "https://www.home-assistant.io/more-info/"
+                        "no-url-available"
+                    )
+                },
+            )
+
+        try:
+            async with asyncio.timeout(OAUTH_AUTHORIZE_URL_TIMEOUT_SEC):
+                preflight = await async_check_tesla_authorize_url(
+                    self.hass, authorize_url
+                )
+        except TimeoutError as err:
+            preflight = OAuthPreflightResult(
+                ok=False,
+                error_key="oauth_preflight_unreachable",
+                detail=str(err),
+            )
+
+        if preflight.ok:
+            return self.async_external_step(step_id="auth", url=authorize_url)
+
+        implementation = cast(TeslaFleetUserImplementation, self.flow_impl)
+        description_placeholders = {
+            "client_id": implementation.client_id,
+            "dashboard": "https://developer.tesla.com/dashboard",
+            "detail": preflight.detail or "-",
+            "redirect_uri": get_oauth_redirect_uri(self.hass),
+        }
+
+        if preflight.error_key == "oauth_preflight_unreachable":
+            _LOGGER.warning(
+                "Tesla OAuth preflight could not reach authorize endpoint: %s",
+                preflight.detail,
+            )
+            return self.async_show_form(
+                step_id="oauth_preflight_warning",
+                data_schema=vol.Schema({}),
+                description_placeholders=description_placeholders,
+            )
+
+        return self.async_show_form(
+            step_id="oauth_preflight_failed",
+            data_schema=vol.Schema({}),
+            errors={"base": preflight.error_key or "oauth_preflight_failed"},
+            description_placeholders=description_placeholders,
+        )
+
+    async def async_step_oauth_preflight_failed(
+        self,
+        user_input: dict[str, Any] | None = None,
+    ) -> ConfigFlowResult:
+        """Re-run the OAuth preflight after the Tesla app was corrected."""
+
+        if user_input is not None:
+            return await self.async_step_auth()
+
+        return self.async_show_form(
+            step_id="oauth_preflight_failed",
+            data_schema=vol.Schema({}),
+            errors={"base": "oauth_preflight_failed"},
+            description_placeholders={
+                "client_id": "-",
+                "dashboard": "https://developer.tesla.com/dashboard",
+                "detail": "-",
+                "redirect_uri": get_oauth_redirect_uri(self.hass),
+            },
+        )
+
+    async def async_step_oauth_preflight_warning(
+        self,
+        user_input: dict[str, Any] | None = None,
+    ) -> ConfigFlowResult:
+        """Allow continuing when only the unauthenticated preflight failed."""
+
+        if user_input is not None:
+            return await super().async_step_auth()
+
+        return self.async_show_form(
+            step_id="oauth_preflight_warning",
+            data_schema=vol.Schema({}),
+            description_placeholders={
+                "client_id": "-",
+                "dashboard": "https://developer.tesla.com/dashboard",
+                "detail": "-",
                 "redirect_uri": get_oauth_redirect_uri(self.hass),
             },
         )

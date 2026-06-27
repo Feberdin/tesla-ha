@@ -8,6 +8,14 @@
         "title": "Tesla OAuth Redirect URI prüfen",
         "description": "Tesla akzeptiert den Login nur, wenn die Redirect URI exakt zur verwendeten Client ID registriert ist.\n\nTrage im [Tesla Developer Portal]({dashboard}) unter deiner App diese Redirect URI ein:\n\n`{redirect_uri}`\n\nSpeichere die Tesla App danach und warte kurz, bevor du fortfährst. Allowed Origin/Public-Key-Domain ist zusätzlich notwendig, ersetzt diese Redirect URI aber nicht."
       },
+      "oauth_preflight_failed": {
+        "title": "Tesla OAuth Einstellungen prüfen",
+        "description": "Die Tesla OAuth Vorabprüfung ist fehlgeschlagen.\n\nClient ID aus Home Assistant:\n\n`{client_id}`\n\nVon Home Assistant verwendete Redirect URI:\n\n`{redirect_uri}`\n\nKorrigiere diese Werte im [Tesla Developer Portal]({dashboard}), speichere die App und warte einige Minuten. Danach erneut fortfahren.\n\nTesla Hinweis: `{detail}`"
+      },
+      "oauth_preflight_warning": {
+        "title": "Tesla OAuth Vorabprüfung nicht erreichbar",
+        "description": "Home Assistant konnte die Tesla OAuth Vorabprüfung gerade nicht abschließen.\n\nClient ID aus Home Assistant:\n\n`{client_id}`\n\nVon Home Assistant verwendete Redirect URI:\n\n`{redirect_uri}`\n\nPrüfe diese Werte im [Tesla Developer Portal]({dashboard}). Wenn sie korrekt sind, kannst du fortfahren; andernfalls korrigiere sie vorher.\n\nTechnischer Hinweis: `{detail}`"
+      },
       "pick_implementation": {
         "title": "Tesla Fleet Anwendung auswählen"
       },
@@ -35,6 +43,10 @@
       "invalid_domain": "Ungültige Domain. Bitte nur den Hostnamen ohne https:// und ohne Pfad eingeben.",
       "invalid_response": "Tesla hat auf die Partnerregistrierung keine gültige Antwort geliefert.",
       "oauth_error": "Tesla Fleet OAuth ist fehlgeschlagen. Prüfe Client ID, Client Secret und Allowed Origin.",
+      "oauth_preflight_client_id": "Tesla erkennt diese Client ID nicht. Prüfe, ob du die Client ID aus derselben Tesla Developer App wie das Client Secret verwendest.",
+      "oauth_preflight_failed": "Tesla lehnt die OAuth-Anfrage ab. Prüfe Client ID, Redirect URI, Grant Types und Scopes.",
+      "oauth_preflight_redirect_uri": "Tesla lehnt die Redirect URI für diese Client ID ab. Trage die angezeigte Redirect URI exakt als Allowed Redirect URI in der Tesla Developer App ein.",
+      "oauth_preflight_unreachable": "Tesla OAuth konnte für die Vorabprüfung nicht erreicht werden.",
       "precondition_failed": "Tesla lehnt die Domain ab. Prüfe Allowed Origin und Public-Key-URL im Tesla Developer Portal.",
       "public_key_mismatch": "Der von Tesla gelesene Public Key passt nicht zum lokalen Schlüssel.",
       "public_key_not_found": "Tesla konnte keinen Public Key für diese Domain abrufen.",

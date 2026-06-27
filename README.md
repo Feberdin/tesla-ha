@@ -89,6 +89,8 @@ Die Bilder zeigen Home Assistant Karten mit Entitaeten dieser Integration.
 - [HACS](https://hacs.xyz) installiert
 - Tesla-Account
 - Tesla Developer App mit Client ID und Client Secret
+- OAuth Grant Type in der Tesla Developer App:
+  `Authorization Code` und `Machine-to-Machine`
 - OAuth Redirect URI in der Tesla Developer App:
   `https://my.home-assistant.io/redirect/oauth`
 - Oeffentliche HTTPS-Domain, die den Tesla Public Key unter `/.well-known/appspecific/com.tesla.3p.public-key.pem` ausliefert
@@ -261,10 +263,13 @@ Das Token wird nach erfolgreichem Abschluss durch Home Assistant gespeichert und
 Seit Version `2.0.0` nutzt die Integration keine Legacy Owner API mehr. Der Tesla Developer Flow benoetigt:
 
 - Client ID und Client Secret aus dem Tesla Developer Portal
+- OAuth Grant Type `Authorization Code` fuer den Benutzer-Login und
+  `Machine-to-Machine` fuer die Partner-Domainregistrierung
 - Redirect URI aus Home Assistant. Standard mit aktivem `my`-Modul:
   `https://my.home-assistant.io/redirect/oauth`
 - Scopes `openid`, `offline_access`, `user_data`, `vehicle_device_data`, `vehicle_location`, `vehicle_cmds`, `vehicle_charging_cmds`
 - eine Allowed Origin passend zur Public-Key-Domain
+- Allowed Returned URL(s) leer lassen
 - einen Public Key unter `https://deine-domain/.well-known/appspecific/com.tesla.3p.public-key.pem`
 - fuer signierte Befehle einen gekoppelten Virtual Key im Fahrzeug
 
@@ -272,6 +277,9 @@ Wenn Tesla direkt nach dem Oeffnen der Login-Seite meldet, dass `redirect_uri`
 nicht fuer die `client_id` registriert ist, ist die Tesla Developer App noch
 nicht passend konfiguriert. Trage exakt die von Home Assistant angezeigte
 Redirect URI ein, speichere die App und starte den OAuth-Flow danach erneut.
+Ab Version `2.0.2` prueft die Integration diese Authorize-URL vor dem
+Browser-Redirect und zeigt Client ID plus Redirect URI direkt im Home Assistant
+Dialog an, wenn Tesla die Kombination ablehnt.
 
 ### Lokale Entwicklung
 
