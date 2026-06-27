@@ -54,6 +54,7 @@ from .const import DOMAIN
 from .oauth import TeslaFleetUserImplementation
 from .oauth_preflight import OAuthPreflightResult, async_check_tesla_authorize_url
 from .oauth_redirect import get_oauth_redirect_uri
+from .public_key_view import async_register_public_key_view
 from .tesla_fleet import CONF_FLEET_DOMAIN, FLEET_PRIVATE_KEY_FILE
 
 _LOGGER = logging.getLogger(__name__)
@@ -287,6 +288,7 @@ class OAuth2FlowHandler(
             await primary_api.get_private_key(
                 self.hass.config.path(FLEET_PRIVATE_KEY_FILE)
             )
+        async_register_public_key_view(self.hass)
 
         errors: dict[str, str] = {}
         description_placeholders = {

@@ -28,7 +28,7 @@
       },
       "domain_registration": {
         "title": "Tesla Public Key hosten",
-        "description": "Lege den folgenden Public Key exakt unter `{public_key_url}` ab und fahre danach fort.\n\n```text\n{pem}\n```"
+        "description": "Die Integration liefert den Public Key automatisch unter `{public_key_url}` aus, wenn diese Domain auf Home Assistant zeigt. Prüfe die URL von außen; sie muss HTTP 200 liefern und mit `-----BEGIN PUBLIC KEY-----` beginnen.\n\nWenn die Domain nicht direkt auf Home Assistant zeigt, lege diesen Public Key dort exakt ab:\n\n```text\n{pem}\n```"
       },
       "registration_complete": {
         "title": "Virtual Key koppeln",

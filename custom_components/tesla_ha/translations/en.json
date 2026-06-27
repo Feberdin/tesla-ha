@@ -28,7 +28,7 @@
       },
       "domain_registration": {
         "title": "Host Tesla public key",
-        "description": "Place the following public key exactly at `{public_key_url}` and continue afterwards.\n\n```text\n{pem}\n```"
+        "description": "The integration serves the public key automatically at `{public_key_url}` when this domain points to Home Assistant. Check the URL from outside your network; it must return HTTP 200 and start with `-----BEGIN PUBLIC KEY-----`.\n\nIf the domain does not point directly to Home Assistant, place this public key there exactly:\n\n```text\n{pem}\n```"
       },
       "registration_complete": {
         "title": "Pair Virtual Key",

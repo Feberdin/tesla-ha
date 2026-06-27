@@ -94,6 +94,8 @@ Die Bilder zeigen Home Assistant Karten mit Entitaeten dieser Integration.
 - OAuth Redirect URI in der Tesla Developer App:
   `https://my.home-assistant.io/redirect/oauth`
 - Oeffentliche HTTPS-Domain, die den Tesla Public Key unter `/.well-known/appspecific/com.tesla.3p.public-key.pem` ausliefert
+  Die Integration liefert diesen Pfad ab `2.0.3` automatisch aus, wenn die
+  Domain auf Home Assistant zeigt.
 
 ### HACS Installation
 
@@ -272,6 +274,18 @@ Seit Version `2.0.0` nutzt die Integration keine Legacy Owner API mehr. Der Tesl
 - Allowed Returned URL(s) leer lassen
 - einen Public Key unter `https://deine-domain/.well-known/appspecific/com.tesla.3p.public-key.pem`
 - fuer signierte Befehle einen gekoppelten Virtual Key im Fahrzeug
+
+Ab Version `2.0.3` registriert die Integration in Home Assistant eine
+oeffentliche Route fuer den Tesla Public Key:
+
+```text
+/.well-known/appspecific/com.tesla.3p.public-key.pem
+```
+
+Wenn deine Public-Key-Domain direkt auf Home Assistant zeigt, reicht es, diesen
+Pfad in Cloudflare Access ohne Login, Captcha oder Challenge freizugeben. Die
+Datei muss danach von außen mit `HTTP 200` erreichbar sein und mit
+`-----BEGIN PUBLIC KEY-----` beginnen.
 
 Wenn Tesla direkt nach dem Oeffnen der Login-Seite meldet, dass `redirect_uri`
 nicht fuer die `client_id` registriert ist, ist die Tesla Developer App noch

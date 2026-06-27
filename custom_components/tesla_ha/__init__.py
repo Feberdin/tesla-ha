@@ -59,6 +59,7 @@ from homeassistant.helpers.config_entry_oauth2_flow import (
 
 from .const import DOMAIN, PLATFORMS
 from .coordinator import TeslaDataCoordinator
+from .public_key_view import async_register_public_key_view
 from .tesla_fleet import (
     CONF_FLEET_DOMAIN,
     FLEET_PRIVATE_KEY_FILE,
@@ -66,6 +67,13 @@ from .tesla_fleet import (
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+
+async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
+    """Set up global Tesla Fleet helpers."""
+
+    async_register_public_key_view(hass)
+    return True
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
