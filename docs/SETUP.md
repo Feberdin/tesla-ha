@@ -1,7 +1,9 @@
-# Setup auf einem neuen Mac
+# Setup
 
-Diese Datei sammelt nur Setup-Schritte, die aus dem aktuellen Repository ableitbar sind.
-Wo Details im Projekt fehlen, ist das bewusst als `zu pruefen` markiert.
+Diese Datei beschreibt den technischen Kurzstart fuer dieses Repository.
+Die ausfuehrliche Endnutzer-Anleitung fuer Tesla Developer Portal,
+Home Assistant, Cloudflare und Public-Key-Hosting steht in
+[TESLA_FLEET_SETUP.md](TESLA_FLEET_SETUP.md).
 
 ## Ziel
 
@@ -16,6 +18,7 @@ Es gibt keinen eigenstaendigen lokalen App-Start, sondern die Integration wird i
 - HACS
 - Tesla-Account
 - Tesla Developer App mit Client ID und Client Secret
+- OAuth Grant Type `Authorization Code` und `Machine-to-Machine`
 - oeffentliche HTTPS-Domain fuer den Tesla Public Key
 
 ## Repository holen
@@ -52,16 +55,20 @@ Weitere Validierung laeuft ueber GitHub Actions:
 
 ## Einrichtung
 
-1. `Einstellungen -> Geraete & Dienste` oeffnen.
-2. Unter `Application Credentials` Client ID und Client Secret fuer die Tesla Developer App hinterlegen.
+1. Tesla Developer App nach [TESLA_FLEET_SETUP.md](TESLA_FLEET_SETUP.md) konfigurieren.
+2. In Home Assistant `Application Credentials` fuer `Tesla` / `tesla_ha` anlegen.
 3. `Tesla` als Integration hinzufuegen.
 4. Tesla OAuth im Browser abschliessen.
-5. Public-Key-Domain eingeben.
-6. Den angezeigten Public Key unter der Well-Known-URL hosten.
+5. Im Domain-Schritt nur den Hostnamen eingeben, zum Beispiel `ha.feberdin.de`.
+6. Public-Key-URL extern pruefen:
+
+   ```bash
+   curl -i https://ha.feberdin.de/.well-known/appspecific/com.tesla.3p.public-key.pem
+   ```
+
 7. Den angezeigten Virtual-Key-Link oeffnen und den Schluessel im Fahrzeug koppeln.
 
 ## Zu pruefen
 
-- Welche Public-Key-Domain wird fuer den jeweiligen Home-Assistant-Betrieb genutzt?
 - Welche Python-Version wird im persoenlichen Setup bevorzugt?
 - Soll die Integration nur in Home Assistant laufen oder auch in einer separaten lokalen Dev-Umgebung getestet werden?

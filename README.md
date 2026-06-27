@@ -83,6 +83,10 @@ Die Bilder zeigen Home Assistant Karten mit Entitaeten dieser Integration.
 
 ## Installation
 
+Die detaillierte Schritt-fuer-Schritt-Anleitung fuer Tesla Developer Portal,
+Home Assistant, Cloudflare Access, Reverse Proxy und externe Public-Key-Hosts
+steht in [docs/TESLA_FLEET_SETUP.md](docs/TESLA_FLEET_SETUP.md).
+
 ### Voraussetzungen
 
 - Home Assistant `2025.1.0` oder neuer
@@ -114,8 +118,8 @@ Die Bilder zeigen Home Assistant Karten mit Entitaeten dieser Integration.
 3. Oeffne `Einstellungen -> Geraete & Dienste`.
 4. Waehle `+ Integration hinzufuegen` und suche nach `Tesla`.
 5. Folge dem Tesla OAuth Login.
-6. Gib im Domain-Schritt die oeffentliche Domain ein, die den Tesla Public Key hostet.
-7. Lege den angezeigten Public Key exakt unter der angezeigten Well-Known-URL ab.
+6. Gib im Domain-Schritt nur den Hostnamen ein, der den Tesla Public Key hostet, zum Beispiel `ha.feberdin.de`.
+7. Pruefe, dass `https://deine-domain/.well-known/appspecific/com.tesla.3p.public-key.pem` von außen erreichbar ist.
 8. Schließe die Partnerregistrierung ab.
 9. Oeffne den angezeigten Virtual-Key-Link und fuege den Schluessel in der Tesla-App hinzu.
 
@@ -294,6 +298,10 @@ Redirect URI ein, speichere die App und starte den OAuth-Flow danach erneut.
 Ab Version `2.0.2` prueft die Integration diese Authorize-URL vor dem
 Browser-Redirect und zeigt Client ID plus Redirect URI direkt im Home Assistant
 Dialog an, wenn Tesla die Kombination ablehnt.
+
+Die komplette Einrichtung inklusive Cloudflare Access, externer Public-Key-
+Hosts und Troubleshooting ist in
+[docs/TESLA_FLEET_SETUP.md](docs/TESLA_FLEET_SETUP.md) beschrieben.
 
 ### Lokale Entwicklung
 
