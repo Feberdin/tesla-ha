@@ -311,7 +311,7 @@ Lokale Pruefung ohne echte Tesla-Zugangsdaten:
 
 ```bash
 python3 -m venv .venv
-.venv/bin/python -m pip install pytest tesla-fleet-api==1.4.7
+.venv/bin/python -m pip install pytest tesla-fleet-api==1.5.0
 .venv/bin/python -m compileall -q custom_components tests
 .venv/bin/python -m pytest tests/test_tesla_fleet.py -q
 ```
