@@ -16,7 +16,7 @@ jobs:
     steps:
       # Checkout repository content for validation.
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # Validate repository against HACS requirements.
       - name: HACS Action
